@@ -1,5 +1,4 @@
- 
-install:
+ install:
 	npm install
 
 publish:
