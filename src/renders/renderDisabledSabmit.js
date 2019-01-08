@@ -1,4 +1,4 @@
-export default ({ disabled }) => {
+export default ({ inputProcess }) => {
   const submit = document.querySelector('button');
-  submit.disabled = disabled;
+  submit.disabled = inputProcess.disabled;
 };

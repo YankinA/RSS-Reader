@@ -1,6 +1,7 @@
-export default ({ valid }) => {
+export default ({ inputProcess }) => {
   const inputForLink = document.getElementById('inputForLink');
-  if (valid) {
+  inputForLink.value = inputProcess.value;
+  if (inputProcess.valid) {
     inputForLink.classList.remove('is-invalid');
     inputForLink.classList.add('is-valid');
   } else {
