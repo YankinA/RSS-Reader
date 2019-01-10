@@ -1,21 +1,3 @@
-const modal = `<div class="modal" id="modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 id="modalTitle"></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-         x
-        </button>
-      </div>
-      <div class="modal-body">
-      <p id="descriptionModal"></ p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>`;
 export default ({ channel }) => {
   const div = document.getElementById('articleLists');
   const ul = document.createElement('ul');
@@ -25,7 +7,7 @@ export default ({ channel }) => {
   channel.forEach(({ channelTitle, linkChannel, news }) => {
     li.innerHTML = `<div class="card">
       <div class="card-header"><h5 class="card-title">
-        <a href="${linkChannel}" class="btn btn-info">${channelTitle.toUpperCase()}</a>
+        <a href="${linkChannel}" class="btn btn-info">${channelTitle}</a>
         </h5>
       </div>
         ${news.map(({ titleText, descriptionText, linkText }) => `<div class="card-body"><a href="${linkText}" class="btn btn-outline-primary btn-sm">${titleText}</a>
@@ -34,8 +16,5 @@ export default ({ channel }) => {
     </div>`;
     ul.appendChild(li);
     div.appendChild(ul);
-    const divModal = document.createElement('div');
-    divModal.innerHTML = modal;
-    div.appendChild(divModal);
   });
 };

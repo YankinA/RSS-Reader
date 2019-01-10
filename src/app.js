@@ -1,47 +1,48 @@
 import validator from 'validator';
 import axios from 'axios';
-import WatchJS from 'melanke-watchjs';
+import { watch } from 'melanke-watchjs';
 import $ from 'jquery';
 
 import {
-  renderChannel, renderValidatorInput, renderDisabledSabmit,
+  renderChannel, renderValidatorInput, renderDisabledSabmit, renderModalContent,
+  renderUserInformation,
 } from './renders';
 
 export default () => {
   const state = {
+    userInformation: '.',
     articleLinks: new Set(),
     channel: [],
     inputProcess: {
       disabled: false,
-      valid: true,
+      valid: '',
       value: '',
     },
-  };
-  const showModalText = (e) => {
-    const button = $(e.relatedTarget);
-    const description = button.data('description ');
-    const modalLabel = $('#descriptionModal');
-    modalLabel.text(description);
+    modal: {
+      description: '',
+    },
   };
 
+
   const inputForLink = document.getElementById('inputForLink');
-  inputForLink.addEventListener('keyup', (e) => {
-    state.inputProcess.value = e.target.value;
+  inputForLink.addEventListener('input', (e) => {
+    const eventValue = e.target.value;
+    state.inputProcess.value = eventValue;
     if (inputForLink.value === '') {
-      state.inputProcess.valid = false;
-      state.inputProcess.disabled = true;
+      state.inputProcess.valid = '';
+      state.inputProcess.disabled = false;
     } else if (!validator.isURL(inputForLink.value)) {
-      state.inputProcess.value = e.target.value.length > 20 ? 'it doesn"t look like a URL' : e.target.value;
-      state.inputProcess.valid = false;
+      state.userInformation = eventValue.length > 20 ? 'it doesn"t look like a URL danger' : '.';
+      state.inputProcess.valid = 'invalid';
       state.inputProcess.disabled = true;
     } else if (state.articleLinks.has(inputForLink.value)) {
-      state.inputProcess.value = 'This URL has already been entered by your dog';
-      state.inputProcess.valid = false;
+      state.userInformation = 'This URL has already been entered by you or your dog danger';
+      state.inputProcess.valid = 'invalid';
       state.inputProcess.disabled = true;
     } else {
-      state.inputProcess.value = e.target.value;
-      state.inputProcess.valid = true;
+      state.inputProcess.valid = 'valid';
       state.inputProcess.disabled = false;
+      state.userInformation = '.';
     }
   });
 
@@ -68,23 +69,45 @@ export default () => {
     e.preventDefault();
     state.articleLinks.add(inputForLink.value);
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
-      response => parseRss(response.data, inputForLink.value),
+      (response) => {
+        console.log('res1');
+        state.inputProcess.disabled = true;
+        state.userInformation = 'Loading, please wait';
+        console.log(state.userInformation);
+        return parseRss(response.data, inputForLink.value);
+      },
     ).then((data) => {
+      console.log('res2');
       state.channel = [...state.channel, data];
+      state.userInformation = 'Loading, please wait';
+      console.log(state.userInformation);
       return state.channel;
     }).then(() => {
       state.inputProcess.disabled = false;
       state.inputProcess.value = '';
+      state.userInformation = 'Loaded';
     })
       .catch((err) => {
+        state.userInformation = 'Oops, something went wrong danger';
         state.inputProcess.disabled = true;
         console.log(err);
       });
   });
 
-  $('#modal').on('shown.bs.modal', showModalText).modal('show');
+  const showModalText = (event) => {
+    const button = $(event.relatedTarget);
+    const description = button.data('description');
+    state.modal.description = description;
+  };
 
-  WatchJS.watch(state, 'inputProcess', () => renderValidatorInput(state));
-  WatchJS.watch(state, 'inputProcess', () => renderDisabledSabmit(state));
-  WatchJS.watch(state, () => renderChannel(state));
+  const hideModalText = () => {
+    state.modal.description = '';
+  };
+  $('#modal').on('show.bs.modal', showModalText).on('hide.bs.modal', hideModalText);
+
+  watch(state, () => renderUserInformation(state));
+  watch(state, () => renderChannel(state));
+  watch(state, 'inputProcess', () => renderValidatorInput(state));
+  watch(state, 'inputProcess', () => renderDisabledSabmit(state));
+  watch(state, 'modal', () => renderModalContent(state));
 };
