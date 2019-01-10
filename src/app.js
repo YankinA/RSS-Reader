@@ -13,8 +13,9 @@ export default () => {
     userInformation: '.',
     articleLinks: new Set(),
     channel: [],
+    updateChannel: false,
     inputProcess: {
-      disabled: false,
+      disabled: true,
       valid: '',
       value: '',
     },
@@ -30,7 +31,7 @@ export default () => {
     state.inputProcess.value = eventValue;
     if (inputForLink.value === '') {
       state.inputProcess.valid = '';
-      state.inputProcess.disabled = false;
+      state.inputProcess.disabled = true;
     } else if (!validator.isURL(inputForLink.value)) {
       state.userInformation = eventValue.length > 20 ? 'it doesn"t look like a URL danger' : '.';
       state.inputProcess.valid = 'invalid';
@@ -55,6 +56,7 @@ export default () => {
     return {
       channelTitle,
       linkChannel,
+      linksNews: new Set(),
       news: [...items].map(item => ({
         titleText: item.querySelector('title').textContent,
         descriptionText: item.querySelector('description').textContent,
@@ -64,25 +66,19 @@ export default () => {
   };
 
   const proxyLink = 'https://cors-anywhere.herokuapp.com/';
+
   const form = document.querySelector('form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     state.articleLinks.add(inputForLink.value);
+    state.userInformation = 'Loading, please wait';
+    state.inputProcess.disabled = true;
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
-      (response) => {
-        console.log('res1');
-        state.inputProcess.disabled = true;
-        state.userInformation = 'Loading, please wait';
-        console.log(state.userInformation);
-        return parseRss(response.data, inputForLink.value);
+      ({ data }) => {
+        const dataDocument = parseRss(data, inputForLink.value);
+        state.channel = [...state.channel, dataDocument];
       },
-    ).then((data) => {
-      console.log('res2');
-      state.channel = [...state.channel, data];
-      state.userInformation = 'Loading, please wait';
-      console.log(state.userInformation);
-      return state.channel;
-    }).then(() => {
+    ).then(() => {
       state.inputProcess.disabled = false;
       state.inputProcess.value = '';
       state.userInformation = 'Loaded';
@@ -105,6 +101,26 @@ export default () => {
   };
   $('#modal').on('show.bs.modal', showModalText).on('hide.bs.modal', hideModalText);
 
+  $('#clear').click(() => {
+    $('#inputForLink').val('').focus();
+  });
+  /*
+  const updateChannel = () => {
+    axios.get(`${proxyLink}${inputForLink.value}`,
+    { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
+      ({ data }) => {
+        return parseRss(data, inputForLink.value);
+      },
+    ).then((data) => {
+      state.channel = [...state.channel, data];
+      return state.channel;
+    }).then(() => {
+    })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  watch(state, () => updateChannel()); */
   watch(state, () => renderUserInformation(state));
   watch(state, () => renderChannel(state));
   watch(state, 'inputProcess', () => renderValidatorInput(state));
