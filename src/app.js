@@ -101,9 +101,6 @@ export default () => {
   };
   $('#modal').on('show.bs.modal', showModalText).on('hide.bs.modal', hideModalText);
 
-  $('#clear').click(() => {
-    $('#inputForLink').val('').focus();
-  });
   /*
   const updateChannel = () => {
     axios.get(`${proxyLink}${inputForLink.value}`,
