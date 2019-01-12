@@ -70,10 +70,10 @@ export default () => {
   const form = document.querySelector('form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    state.articleLinks.add(inputForLink.value);
-    state.userInformation = 'Loading, please wait';
     state.inputProcess.disabledSubmit = true;
     state.inputProcess.disabledInput = true;
+    state.articleLinks.add(inputForLink.value);
+    state.userInformation = 'Loading, please wait';
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
       ({ data }) => {
         const dataDocument = parseRss(data, inputForLink.value);
@@ -136,7 +136,7 @@ export default () => {
       }));
   watch(state, 'updateChannel', () => setTimeout(updateChannel, 5000));
   watch(state, () => renderUserInformation(state));
-  watch(state, () => renderChannel(state));
+  watch(state, 'channels', () => renderChannel(state));
   watch(state, 'inputProcess', () => renderInputEvent(state));
   watch(state, 'inputProcess', () => renderDisabledSubmit(state));
   watch(state, 'modal', () => renderModalContent(state));
