@@ -30,7 +30,7 @@ export default () => {
   const state = {
     userInformation: '.',
     articleLinks: new Set(),
-    channel: [],
+    channels: [],
     updateChannel: false,
     inputProcess: {
       disabledSubmit: true,
@@ -77,7 +77,7 @@ export default () => {
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
       ({ data }) => {
         const dataDocument = parseRss(data, inputForLink.value);
-        state.channel = [dataDocument, ...state.channel];
+        state.channels = [dataDocument, ...state.channels];
       },
     ).then(() => {
       state.inputProcess.disabledInput = false;
@@ -105,7 +105,7 @@ export default () => {
   };
   $('#modal').on('show.bs.modal', showModalText).on('hide.bs.modal', hideModalText);
 
-  const updateChannel = () => state.channel
+  const updateChannel = () => state.channels
     .forEach(({
       linkChannel, linksNews, news, channelTitle,
     }) => axios

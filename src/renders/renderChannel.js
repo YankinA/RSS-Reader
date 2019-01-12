@@ -1,10 +1,10 @@
-export default ({ channel }) => {
+export default ({ channels }) => {
   const div = document.getElementById('articleLists');
   const ul = document.createElement('ul');
   ul.classList.add('list-group');
   const li = document.createElement('li');
   li.classList.add('list-group-item');
-  channel.forEach(({ channelTitle, linkChannel, news }) => {
+  channels.forEach(({ channelTitle, linkChannel, news }) => {
     li.innerHTML = `
     <div class="jumbotron text-left">
       <div class="container">
