@@ -25,7 +25,7 @@ export default ({ channels }) => {
               <p class="card-text">${descriptionText}</p>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
-                  <button class="btn-myModal btn btn-outline-secondary btn-sm" type="button" data-toggle="modal" data-description="${descriptionText}", data-target="#modal">Open news</button>
+                  <button class="btn-myModal btn btn-outline-secondary btn-sm" type="button" data-toggle="modal" data-title="${titleText}" data-description="${descriptionText}", data-target="#modal">Open news</button>
                   <a href="${linkText}" class="btn btn-sm btn-outline-secondary">link news</a>
                 </div>
               </div>
