@@ -107,7 +107,7 @@ export default () => {
 
   const updateChannel = () => state.channels
     .forEach(({
-      linkChannel, linksNews, news, channelTitle,
+      linkChannel, linksNews, news,
     }) => axios
       .get(`${proxyLink}${linkChannel}`,
         { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
@@ -132,7 +132,6 @@ export default () => {
       })
       .catch((err) => {
         console.log(err);
-        state.userInformation = `ERROR No added new news from: ${channelTitle}`;
       }));
   watch(state, 'updateChannel', () => setTimeout(updateChannel, 5000));
   watch(state, () => renderUserInformation(state));
