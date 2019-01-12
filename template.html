@@ -6,26 +6,28 @@
     <title>RSS</title>
   </head>
   <body>
- <div class="jumbotron">
-  <h1 class="display-4">RSS Reader</h1>
-  <p class="lead">This is an "RSS Reader" project on Hexlet</p>
-  <hr class="my-4">
-  <form>
-    <div class="col=12">
-      <label for="inputForLink" id="userInformation" class="text-success">. </label>
-    </div>
-       <div class="form-row">
-         <div class="col-4 ">
-           <input value="" type="text" class="form-control" id="inputForLink" placeholder="Enter link">
-         </div>
-         <div class="col-auto">
-           <button type="submit"disabled class="btn btn-outline-secondary">ADD Link</button>
-         </div>
-       </div>
-     </form>
-      <hr class="my-4">
-      <div class="coll-auto" id="articleLists" style="max-width: 45rem;">
+  <div>
+   <div class="jumbotron">
+    <h1 class="display-4">RSS Reader</h1>
+    <p class="lead">This is an "RSS Reader" project on Hexlet</p>
+    <hr class="my-4">
+    <form>
+      <div class="col=12">
+        <label for="inputForLink" id="userInformation" class="text-success">. </label>
       </div>
+         <div class="form-row">
+           <div class="col-4 ">
+             <input value="" type="text" class="form-control" id="inputForLink" placeholder="Enter link">
+           </div>
+           <div class="col-auto">
+             <button type="submit"disabled class="btn btn-outline-secondary">ADD Link</button>
+           </div>
+         </div>
+       </form>
+        <hr class="my-4">
+  </div>
+</div>
+<div id="articleLists">
 </div>
 <div class="modal" id="modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">

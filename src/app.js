@@ -4,9 +4,27 @@ import { watch } from 'melanke-watchjs';
 import $ from 'jquery';
 
 import {
-  renderChannel, renderValidatorInput, renderDisabledSabmit, renderModalContent,
+  renderChannel, renderInputEvent, renderDisabledSubmit, renderModalContent,
   renderUserInformation,
 } from './renders';
+
+const parseRss = (XMLdata, linkChannel) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(XMLdata, 'application/xml');
+  const items = doc.querySelectorAll('item');
+  const channel = doc.querySelector('channel');
+  const channelTitle = channel.querySelector('title').textContent;
+  return {
+    channelTitle,
+    linkChannel,
+    linksNews: new Set([...items].map(item => item.querySelector('link').textContent)),
+    news: [...items].map(item => ({
+      titleText: item.querySelector('title').textContent,
+      descriptionText: item.querySelector('description').textContent,
+      linkText: item.querySelector('link').textContent,
+    })),
+  };
+};
 
 export default () => {
   const state = {
@@ -15,7 +33,8 @@ export default () => {
     channel: [],
     updateChannel: false,
     inputProcess: {
-      disabled: true,
+      disabledSubmit: true,
+      disabledInput: false,
       valid: '',
       value: '',
     },
@@ -24,46 +43,27 @@ export default () => {
     },
   };
 
-
   const inputForLink = document.getElementById('inputForLink');
   inputForLink.addEventListener('input', (e) => {
     const eventValue = e.target.value;
     state.inputProcess.value = eventValue;
     if (inputForLink.value === '') {
       state.inputProcess.valid = '';
-      state.inputProcess.disabled = true;
+      state.inputProcess.disabledSubmit = true;
     } else if (!validator.isURL(inputForLink.value)) {
       state.userInformation = eventValue.length > 20 ? 'it doesn"t look like a URL danger' : '.';
       state.inputProcess.valid = 'invalid';
-      state.inputProcess.disabled = true;
+      state.inputProcess.disabledSubmit = true;
     } else if (state.articleLinks.has(inputForLink.value)) {
       state.userInformation = 'This URL has already been entered by you or your dog danger';
       state.inputProcess.valid = 'invalid';
-      state.inputProcess.disabled = true;
+      state.inputProcess.disabledSubmit = true;
     } else {
       state.inputProcess.valid = 'valid';
-      state.inputProcess.disabled = false;
+      state.inputProcess.disabledSubmit = false;
       state.userInformation = '.';
     }
   });
-
-  const parseRss = (XMLdata, linkChannel) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(XMLdata, 'application/xml');
-    const items = doc.querySelectorAll('item');
-    const channel = doc.querySelector('channel');
-    const channelTitle = channel.querySelector('title').textContent;
-    return {
-      channelTitle,
-      linkChannel,
-      linksNews: new Set(),
-      news: [...items].map(item => ({
-        titleText: item.querySelector('title').textContent,
-        descriptionText: item.querySelector('description').textContent,
-        linkText: item.querySelector('link').textContent,
-      })),
-    };
-  };
 
   const proxyLink = 'https://cors-anywhere.herokuapp.com/';
 
@@ -72,20 +72,24 @@ export default () => {
     e.preventDefault();
     state.articleLinks.add(inputForLink.value);
     state.userInformation = 'Loading, please wait';
-    state.inputProcess.disabled = true;
+    state.inputProcess.disabledSubmit = true;
+    state.inputProcess.disabledInput = true;
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
       ({ data }) => {
         const dataDocument = parseRss(data, inputForLink.value);
-        state.channel = [...state.channel, dataDocument];
+        state.channel = [dataDocument, ...state.channel];
       },
     ).then(() => {
-      state.inputProcess.disabled = false;
+      state.inputProcess.disabledInput = false;
+      state.inputProcess.disabledSubmit = false;
       state.inputProcess.value = '';
       state.userInformation = 'Loaded';
+      state.updateChannel = true;
     })
       .catch((err) => {
         state.userInformation = 'Oops, something went wrong danger';
-        state.inputProcess.disabled = true;
+        state.inputProcess.disabledInput = false;
+        state.inputProcess.disabledSubmit = true;
         console.log(err);
       });
   });
@@ -101,26 +105,39 @@ export default () => {
   };
   $('#modal').on('show.bs.modal', showModalText).on('hide.bs.modal', hideModalText);
 
-  /*
-  const updateChannel = () => {
-    axios.get(`${proxyLink}${inputForLink.value}`,
-    { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
-      ({ data }) => {
-        return parseRss(data, inputForLink.value);
-      },
-    ).then((data) => {
-      state.channel = [...state.channel, data];
-      return state.channel;
-    }).then(() => {
-    })
+  const updateChannel = () => state.channel
+    .forEach(({
+      linkChannel, linksNews, news, channelTitle,
+    }) => axios
+      .get(`${proxyLink}${linkChannel}`,
+        { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
+        ({ data }) => parseRss(data, linkChannel),
+      ).then((data) => {
+        const linksNewsData = data.linksNews;
+        const newsData = data.news;
+        linksNewsData.forEach((link) => {
+          if (!linksNews.has(link)) {
+            linksNews.add(link);
+            newsData.forEach((n) => {
+              if (n.linkText === link) {
+                console.log(n);
+                news.unshift(n);
+              }
+            });
+          }
+        });
+      }).then(() => {
+        console.log('finished');
+        setTimeout(updateChannel, 5000);
+      })
       .catch((err) => {
         console.log(err);
-      });
-  };
-  watch(state, () => updateChannel()); */
+        state.userInformation = `ERROR No added new news from: ${channelTitle}`;
+      }));
+  watch(state, 'updateChannel', () => setTimeout(updateChannel, 5000));
   watch(state, () => renderUserInformation(state));
   watch(state, () => renderChannel(state));
-  watch(state, 'inputProcess', () => renderValidatorInput(state));
-  watch(state, 'inputProcess', () => renderDisabledSabmit(state));
+  watch(state, 'inputProcess', () => renderInputEvent(state));
+  watch(state, 'inputProcess', () => renderDisabledSubmit(state));
   watch(state, 'modal', () => renderModalContent(state));
 };
