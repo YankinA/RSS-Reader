@@ -72,7 +72,6 @@ export default () => {
     e.preventDefault();
     state.inputProcess.disabledSubmit = true;
     state.inputProcess.disabledInput = true;
-    state.articleLinks.add(inputForLink.value);
     state.userInformation = 'Loading, please wait';
     axios.get(`${proxyLink}${inputForLink.value}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(
       ({ data }) => {
@@ -80,6 +79,7 @@ export default () => {
         state.channels = [dataDocument, ...state.channels];
       },
     ).then(() => {
+      state.articleLinks.add(inputForLink.value);
       state.inputProcess.disabledInput = false;
       state.inputProcess.disabledSubmit = false;
       state.inputProcess.value = '';
@@ -97,7 +97,9 @@ export default () => {
   const showModalText = (event) => {
     const button = $(event.relatedTarget);
     const description = button.data('description');
+    const title = button.data('title');
     state.modal.description = description;
+    state.modal.title = title;
   };
 
   const hideModalText = () => {
@@ -132,6 +134,7 @@ export default () => {
       })
       .catch((err) => {
         console.log(err);
+        setTimeout(updateChannel, 5000);
       }));
   watch(state, 'updateChannel', () => setTimeout(updateChannel, 5000));
   watch(state, () => renderUserInformation(state));
