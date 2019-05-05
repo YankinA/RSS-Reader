@@ -1,6 +1,6 @@
 ## RSS Reader с автоматическим обновлением - [RSS Reader](http://angry-sail.surge.sh/)
 
-###генератор RSS для тестирования:
+### генератор RSS для тестирования:
 http://lorem-rss.herokuapp.com/feed
 
 * По умолчанию обновляется раз в минуту: /feed
