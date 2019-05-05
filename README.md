@@ -1,5 +1,12 @@
 ## RSS Reader с автоматическим обновлением - [RSS Reader](http://angry-sail.surge.sh/)
 
+###генератор RSS для тестирования:
+http://lorem-rss.herokuapp.com/feed
+
+* По умолчанию обновляется раз в минуту: /feed
+* Обновляется каждую секунду: /feed?unit=minute
+* Обновляется каждые 30 секунд: /feed?unit=second&interval=30
+
 ### Основные инструменты:
 * webpack
 * Jquery
